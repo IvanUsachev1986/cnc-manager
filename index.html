@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CNC Manager - Cloud Edition</title>
-    <!-- Подключаем библиотеки -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -20,14 +19,13 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-        // Импортируем Firebase напрямую из CDN (работает прямо в браузере)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const { useState, useEffect } = React;
 
-        // --- 1. ТВОЯ КОНФИГУРАЦИЯ FIREBASE ---
+        // --- ТВОЯ КОНФИГУРАЦИЯ FIREBASE ---
         const firebaseConfig = {
           apiKey: "AIzaSyDAHKWem4N5NO4TYnEsAhC6KKAMrQsU8yA",
           authDomain: "cnc-manager-a6a06.firebaseapp.com",
@@ -37,7 +35,6 @@
           appId: "1:113877473214:web:846ac76f7a11377d918bef"
         };
 
-        // Инициализация сервисов Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -51,44 +48,54 @@
             Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
             Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
             Minus: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
-            ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            ArrowLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>,
+            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         };
 
-        // Полные тестовые данные из твоих таблиц
+        // --- ДАННЫЕ ИЗ ТВОИХ CSV ТАБЛИЦ ---
         const initialProjects = [
           {
-            id: "proj_1", name: "Gross Siemens", startDate: "6.05.2026",
+            id: "proj_1", name: "Gross Siemens", startDate: "06.05.2026",
             materials: [
-              { id: 101, name: "MDF G Yazuk 22mm (2750 * 1220)", total: 6, done: 0 },
-              { id: 102, name: "Birch 16mm FrmGraf (2440 * 1220)", total: 34, done: 0 },
-              { id: 103, name: "Birch 6mm Grafit (2440 * 1220)", total: 9, done: 0 },
-              { id: 104, name: "MDF G Yazuk 19mm (2440 * 1220)", total: 7, done: 0 },
-              { id: 105, name: "Birch 12 Black (2440 * 1220)", total: 1, done: 0 },
-              { id: 106, name: "Birch 18 EgozAmeri 3m", total: 1, done: 0 },
-              { id: 107, name: "Dikt 17 EgozAmerik (2440 * 1220)", total: 6, done: 0 },
-              { id: 108, name: "MDF 8mm (2440 * 1220)", total: 1, done: 0 },
-              { id: 109, name: "Birch 16 EgozAmeri", total: 11, done: 0 }
+              { id: 101, name: "MDF G Yazuk 22mm (2750 * 1220)", total: 6, done: 6 },
+              { id: 102, name: "Birch 16mm FrmGraf (2440 * 1220)", total: 34, done: 34 },
+              { id: 103, name: "Birch 6mm Grafit (2440 * 1220)", total: 9, done: 9 },
+              { id: 104, name: "MDF G Yazuk 19mm (2440 * 1220)", total: 7, done: 7 },
+              { id: 105, name: "Birch 12 Black (2440 * 1220)", total: 1, done: 1 },
+              { id: 106, name: "Birch 18 EgozAmeri 3m (3050 * 1350)", total: 1, done: 0 },
+              { id: 107, name: "Dikt 17 EgozAmerik (2440 * 1220)", total: 6, done: 6 },
+              { id: 108, name: "MDF 8mm (2440 * 1220)", total: 1, done: 1 },
+              { id: 109, name: "Birch 16 EgozAmeri (2440 * 1220)", total: 11, done: 0 }
             ]
           },
           {
             id: "proj_2", name: "Rukman proekt", startDate: "14.05.2026",
             materials: [
               { id: 201, name: "Dikt 17 Alon (2440 * 1220)", total: 15, done: 0 },
-              { id: 202, name: "Dikt 5 AlonMesunhran", total: 9, done: 0 },
-              { id: 203, name: "Dikt 17 Alon 6080-17.1", total: 5, done: 0 },
+              { id: 202, name: "Dikt 5 AlonMesunhran (2440 * 1220)", total: 9, done: 0 },
+              { id: 203, name: "Dikt 17 Alon 6080-17.1 (2440 * 1220)", total: 5, done: 0 },
               { id: 204, name: "Birch 18mm (2440 * 1220)", total: 1, done: 0 },
-              { id: 205, name: "MDF G Yazuk 17mm", total: 2, done: 0 },
-              { id: 206, name: "MDF G Yazuk 22mm", total: 2, done: 0 },
-              { id: 207, name: "MDF 17 FornirAlon 2", total: 6, done: 0 },
-              { id: 208, name: "MDF 17 FornirAlon 1", total: 2, done: 0 }
+              { id: 205, name: "MDF G Yazuk 17mm (2440 * 1220)", total: 2, done: 2 },
+              { id: 206, name: "MDF G Yazuk 22mm (2750 * 1220)", total: 2, done: 2 },
+              { id: 207, name: "MDF 17 FornirAlon 2 (2440 * 1220)", total: 6, done: 6 },
+              { id: 208, name: "MDF 17 FornirAlon 1 (2440 * 1220)", total: 2, done: 2 }
+            ]
+          },
+          {
+            id: "proj_3", name: "Tevat Noah - Lavi proekt", startDate: "14.05.2026",
+            materials: [
+              { id: 301, name: "Dikt 17 FrmGraft (2440 * 1220)", total: 39, done: 30 }
             ]
           }
         ];
 
         const initialInventory = [
           "Birch 16mm (2440 * 1220)", "Birch 16mm Grain (2435 * 1215)", "Birch 18mm (2440 * 1220)",
-          "Dikt 17 Alon (2440 * 1220)", "Dikt 17 Alon 6080-16.7 (2440 * 1220)", "Dikt 17 FrmGraft (2440 * 1220)",
-          "Front Aluminium Grafit (2440 * 1220)", "HDF 19mm FibraTop (2440 * 1220)"
+          "Dikt 17 Alon (2440 * 1220)", "Dikt 17 Alon 6080-16.7 (2440 * 1220)", "Dikt 17 Alon 6080-17.1 (2440 * 1220)",
+          "Dikt 17 FormLavn (2440 * 1220)", "Dikt 17 FormYuta (2440 * 1220)", "Dikt 17 FrmGraft (2440 * 1220)",
+          "Dikt 5 AlonMesunhran (2440 * 1220)", "Dikt 5 FormAlon (2440 * 1220)", "Dikt 5 FormYuta (2440 * 1220)",
+          "Dikt 5 FrmGraft (2440 * 1220)", "Front Aluminium Grafit (2440 * 1220)", "HDF 19mm FibraTop (2440 * 1220)",
+          "HDF 22mm FibraTop (2440 * 1220)"
         ];
 
         function App() {
@@ -98,10 +105,11 @@
           const [activeTab, setActiveTab] = useState('projects');
           const [projects, setProjects] = useState([]);
           const [selectedProjectId, setSelectedProjectId] = useState(null);
+          const [isCreatingProject, setIsCreatingProject] = useState(false);
           const [toolsLog, setToolsLog] = useState([]);
           const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-          // 2. Авторизация при входе
+          // 1. Авторизация
           useEffect(() => {
             const initAuth = async () => {
               try {
@@ -119,17 +127,15 @@
             return () => unsubscribe();
           }, []);
 
-          // 3. Подключение к облаку в реальном времени (слушаем данные)
+          // 2. Чтение данных из БД
           useEffect(() => {
-            if (!user) return; // Ждем пока зайдем
+            if (!user) return;
 
-            // Пути в базе данных (Общие для телефона и компьютера)
             const projectsRef = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
             const toolsRef = collection(db, 'artifacts', appId, 'public', 'data', 'toolsLog');
 
             const unsubProjects = onSnapshot(projectsRef, (snapshot) => {
               const projs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-              // Сортируем по ID (чтобы не прыгали)
               projs.sort((a, b) => a.id.localeCompare(b.id));
               setProjects(projs);
               setIsDataLoaded(true);
@@ -137,24 +143,20 @@
 
             const unsubTools = onSnapshot(toolsRef, (snapshot) => {
               const tools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-              tools.sort((a, b) => b.timestamp - a.timestamp); // Новые сверху
+              tools.sort((a, b) => b.timestamp - a.timestamp);
               setToolsLog(tools);
             }, (err) => console.error("DB Error:", err));
 
-            return () => {
-              unsubProjects();
-              unsubTools();
-            };
+            return () => { unsubProjects(); unsubTools(); };
           }, [user]);
 
-          // --- 4. ДЕЙСТВИЯ: ОТПРАВКА В ОБЛАКО ---
+          // --- 3. ДЕЙСТВИЯ (ДОБАВЛЕНА ОБРАБОТКА ОШИБОК) ---
 
           const handleUpdateMaterial = async (projectId, materialId, newDoneValue) => {
             if (!user) return;
             const project = projects.find(p => p.id === projectId);
             if (!project) return;
 
-            // Обновляем массив материалов
             const updatedMaterials = project.materials.map(mat => {
               if (mat.id === materialId) {
                 const validDone = Math.max(0, Math.min(newDoneValue, mat.total));
@@ -163,35 +165,79 @@
               return mat;
             });
 
-            // Отправляем в Firebase
-            const projectDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', projectId);
-            await updateDoc(projectDocRef, { materials: updatedMaterials });
+            try {
+              const projectDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', projectId);
+              await updateDoc(projectDocRef, { materials: updatedMaterials });
+            } catch (err) {
+              console.error(err);
+            }
+          };
+
+          const handleSaveNewProject = async (projectName, newMaterials, setErrorState) => {
+            if (!projectName.trim()) return;
+            if (!user) {
+                setErrorState("Отсутствует подключение. Проверьте интернет или настройки БД.");
+                return;
+            }
+            
+            try {
+                const newProject = {
+                  id: "proj_" + Date.now(),
+                  name: projectName,
+                  startDate: new Date().toLocaleDateString('ru-RU'),
+                  materials: newMaterials.filter(m => m.name.trim() !== '').map((m, i) => ({
+                    id: Date.now() + i,
+                    name: m.name,
+                    total: Number(m.total) || 1,
+                    done: 0
+                  }))
+                };
+
+                const projectDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', newProject.id);
+                await setDoc(projectDocRef, newProject);
+                setIsCreatingProject(false); 
+            } catch (err) {
+                console.error(err);
+                setErrorState("Ошибка Firebase: " + err.message);
+            }
           };
 
           const handleAddToolLog = async () => {
             if (!user) return;
             const toolNum = window.prompt("Введите номер инструмента/фрезы (например: 38):", "");
             if (toolNum) {
-              const now = new Date();
-              const dateStr = now.toLocaleDateString('ru-RU');
-              const timeStr = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
-              
-              const toolsRef = collection(db, 'artifacts', appId, 'public', 'data', 'toolsLog');
-              await addDoc(toolsRef, { 
-                date: dateStr, 
-                time: timeStr, 
-                tool: toolNum,
-                timestamp: now.getTime()
-              });
+              try {
+                  const now = new Date();
+                  const dateStr = now.toLocaleDateString('ru-RU');
+                  const timeStr = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+                  
+                  const toolsRef = collection(db, 'artifacts', appId, 'public', 'data', 'toolsLog');
+                  await addDoc(toolsRef, { 
+                    date: dateStr, 
+                    time: timeStr, 
+                    tool: toolNum,
+                    timestamp: now.getTime()
+                  });
+              } catch (err) {
+                  window.alert("Ошибка: " + err.message);
+              }
             }
           };
 
-          // Кнопка для первой загрузки базы данных (тестовыми данными из CSV)
+          // Кнопка для загрузки всех данных из CSV в облако
           const handleSeedDatabase = async () => {
             if (!user) return;
-            const projectsRef = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
-            for (const proj of initialProjects) {
-              await setDoc(doc(projectsRef, proj.id), proj);
+            try {
+                const projectsRef = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
+                for (const proj of initialProjects) {
+                  await setDoc(doc(projectsRef, proj.id), proj);
+                }
+                
+                // Добавим фрезу из лога
+                const toolsRef = collection(db, 'artifacts', appId, 'public', 'data', 'toolsLog');
+                await addDoc(toolsRef, { date: "14.05.26", time: "7:20", tool: "38", timestamp: new Date().getTime() });
+            } catch (err) {
+                window.alert("Ошибка загрузки данных: " + err.message);
             }
           };
 
@@ -217,17 +263,25 @@
 
           const ProjectListView = () => (
             <div className="p-4 pb-24 space-y-4">
-              <h1 className="text-2xl font-bold text-white mb-6">Проекты в работе</h1>
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-white">Проекты в работе</h1>
+                <button 
+                  onClick={() => setIsCreatingProject(true)}
+                  className="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center"
+                >
+                  <Icons.Plus />
+                </button>
+              </div>
               
-              {/* Если база пуста, показываем кнопку загрузки */}
+              {/* Если база пуста, показываем кнопку загрузки ВСЕХ таблиц */}
               {projects.length === 0 && isDataLoaded && (
                 <div className="bg-slate-800 p-6 rounded-xl text-center border border-dashed border-slate-600">
-                  <p className="text-slate-400 mb-4">База данных пуста.</p>
+                  <p className="text-slate-400 mb-4">В облаке пока нет проектов.</p>
                   <button 
                     onClick={handleSeedDatabase}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg active:scale-95 transition-transform"
+                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg active:scale-95 transition-transform text-sm"
                   >
-                    Загрузить тестовые данные
+                    Загрузить проекты из Таблицы
                   </button>
                 </div>
               )}
@@ -249,6 +303,59 @@
               ))}
             </div>
           );
+
+          const CreateProjectView = () => {
+            const [projName, setProjName] = useState('');
+            const [matList, setMatList] = useState([{ id: Date.now(), name: '', total: 1 }]);
+            const [saveError, setSaveError] = useState(''); // Стейт для вывода ошибки
+
+            const addMatRow = () => setMatList([...matList, { id: Date.now(), name: '', total: 1 }]);
+            const updateMat = (id, field, val) => setMatList(matList.map(m => m.id === id ? { ...m, [field]: val } : m));
+            const removeMat = (id) => setMatList(matList.filter(m => m.id !== id));
+
+            return (
+              <div className="p-4 pb-24">
+                <button onClick={() => setIsCreatingProject(false)} className="flex items-center text-blue-400 mb-4 p-2 -ml-2">
+                  <Icons.ArrowLeft /> <span className="ml-2 font-medium">Отмена</span>
+                </button>
+                <h1 className="text-2xl font-bold text-white mb-6">Новый проект</h1>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-slate-400 mb-1 block">Название проекта</label>
+                    <input type="text" value={projName} onChange={e => setProjName(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="Например: Кухня Иванова" />
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-slate-400 mb-2 block">Материалы для резки</label>
+                    {matList.map((mat, index) => (
+                      <div key={mat.id} className="flex space-x-2 mb-2 items-center">
+                        <input list="inventory-list" value={mat.name} onChange={e => updateMat(mat.id, 'name', e.target.value)} placeholder="Выберите или введите..." className="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white outline-none focus:border-blue-500" />
+                        <input type="number" min="1" value={mat.total} onChange={e => updateMat(mat.id, 'total', e.target.value)} className="w-16 bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white text-center outline-none focus:border-blue-500" />
+                        <button onClick={() => removeMat(mat.id)} className="text-slate-500 hover:text-red-400 p-2"><Icons.Trash /></button>
+                      </div>
+                    ))}
+                    <button onClick={addMatRow} className="text-sm text-blue-400 mt-2 flex items-center p-2 -ml-2"><Icons.Plus /> Добавить материал</button>
+                  </div>
+                </div>
+
+                {/* Блок вывода ошибки если сохранение не прошло */}
+                {saveError && (
+                    <div className="mt-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-sm">
+                        {saveError}
+                    </div>
+                )}
+
+                <button 
+                  onClick={() => handleSaveNewProject(projName, matList, setSaveError)} 
+                  disabled={!projName.trim()} 
+                  className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-4 rounded-xl mt-6 shadow-lg active:scale-95 transition-transform"
+                >
+                  Сохранить проект
+                </button>
+              </div>
+            );
+          };
 
           const ProjectDetailView = () => {
             const project = projects.find(p => p.id === selectedProjectId);
@@ -353,7 +460,6 @@
             </div>
           );
 
-          // Экран загрузки
           if (isAuthLoading) {
             return (
               <div className="min-h-screen flex items-center justify-center text-slate-400 bg-slate-900">
@@ -367,8 +473,13 @@
 
           return (
             <div className="max-w-md mx-auto relative h-full min-h-screen bg-slate-900 shadow-2xl">
-              {/* Верхняя часть для контента */}
-              {selectedProjectId ? (
+              <datalist id="inventory-list">
+                {initialInventory.map((item, idx) => <option key={idx} value={item} />)}
+              </datalist>
+
+              {isCreatingProject ? (
+                <CreateProjectView />
+              ) : selectedProjectId ? (
                 <ProjectDetailView />
               ) : (
                 <>
@@ -378,8 +489,7 @@
                 </>
               )}
 
-              {/* Нижняя навигация */}
-              {!selectedProjectId && (
+              {!selectedProjectId && !isCreatingProject && (
                 <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 flex justify-around pb-safe pt-2 px-2 z-50 max-w-md mx-auto">
                   <button 
                     onClick={() => setActiveTab('projects')}
