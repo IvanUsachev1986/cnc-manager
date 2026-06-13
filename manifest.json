@@ -1,6 +1,6 @@
 {
-  "name": "CNC Manager",
-  "short_name": "CNC",
+  "name": "Work Manager",
+  "short_name": "WM",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
